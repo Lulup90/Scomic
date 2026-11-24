@@ -96,7 +96,8 @@ export function exportText(project: Project, opts: ExportOptions): string {
   if (project.author) out.push(`di ${project.author}`);
   out.push(`Formato: ${size.name} (${size.label})`, '');
   for (const p of pages) {
-    out.push('='.repeat(48), `TAVOLA ${p.number}  (${vignette(p.panelCount)})`, '='.repeat(48));
+    // Ogni tavola su una pagina nuova: il carattere di salto pagina viene rispettato in stampa
+    out.push('\f' + '='.repeat(48), `TAVOLA ${p.number}  (${vignette(p.panelCount)})`, '='.repeat(48));
     if (opts.includeNotes && p.notes.trim()) out.push(`Note: ${p.notes.trim()}`);
     out.push('');
     for (const v of p.panels) {

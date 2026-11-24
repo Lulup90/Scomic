@@ -1449,13 +1449,79 @@ kbd {
   gap: 8px;
 }
 .paper {
-  background: #ffffff;
   color: #111111;
-  box-shadow: var(--shadow);
-  padding: 56px 64px;
   font-family: var(--mono);
-  font-size: 15px;
-  line-height: 1.5;
+}
+/* Fogli A4 dell'anteprima: 794 × 1123 px con margini di 2,5 cm (come Word e la stampa) */
+.sheets-scroll {
+  overflow-x: auto;
+  padding: 4px 4px 24px;
+  margin: 0 -4px;
+}
+.sheets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: max-content;
+  min-width: 100%;
+}
+.paper-sheet {
+  position: relative;
+  width: 794px;
+  box-sizing: border-box;
+  padding: 94px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+  font-size: 16px;
+  line-height: 1.35;
+}
+.paper-sheet-content > :first-child,
+.paper-sheet-content > :first-child > :first-child {
+  margin-top: 0;
+}
+.page-cut {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed #b45309;
+  pointer-events: none;
+}
+.page-cut span {
+  position: absolute;
+  right: 12px;
+  top: -11px;
+  background: #fdf1e4;
+  color: #7a3a05;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.page-count {
+  position: absolute;
+  top: 36px;
+  right: 40px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 11px;
+  color: #77756f;
+}
+.paper-sheet.overflow .page-count {
+  color: #9a4a06;
+  font-weight: 600;
+}
+.page-info {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--ok-soft);
+  color: var(--ok);
+  line-height: 1.45;
+}
+.page-info.warn {
+  background: var(--warn-soft);
+  color: var(--warn);
 }
 .paper .small {
   font-size: 12px;
@@ -1519,13 +1585,30 @@ kbd {
     padding: 0;
     max-width: none;
   }
-  .paper {
-    box-shadow: none;
+  /* Una tavola per pagina: ogni foglio comincia su una pagina nuova */
+  .sheets-scroll {
+    overflow: visible;
     padding: 0;
+    margin: 0;
   }
-  .paper-page {
+  .sheets {
+    display: block;
+    width: auto;
+  }
+  .paper-sheet {
+    width: auto;
+    min-height: 0 !important;
+    padding: 0;
+    box-shadow: none;
+    font-size: 12pt;
+  }
+  .paper-sheet.break-before {
     break-before: page;
   }
+}
+@page {
+  size: A4;
+  margin: 25mm;
 }
 
 /* --- Telefono ------------------------------------------------------------ */
@@ -1555,9 +1638,6 @@ kbd {
   }
   .element-text {
     grid-column: 1;
-  }
-  .paper {
-    padding: 24px 18px;
   }
   .menabo,
   .print-view {

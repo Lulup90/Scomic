@@ -26,6 +26,9 @@ Editor per scrivere sceneggiature a fumetti, con l'anteprima della tavola in pro
   - Riconosce tavole (TAVOLA / PAGINA / PAG.), strisce, vignette (VIGNETTA / VIG.), intestazioni come `EST. PORTO — NOTTE`, righe `Luce:` e `Inquadratura:`.
   - Riconosce battute (`MARCO: …`, `MARCO (pensiero): …` o il nome da solo su una riga con la battuta sotto), didascalie, SFX e note.
   - Prima di importare mostra un'anteprima con tavole, vignette, personaggi e luoghi trovati. Si può importare come nuovo progetto o aggiungere in fondo.
+- **Una tavola per pagina** in tutte le esportazioni: ogni tavola comincia su una pagina nuova. Se una tavola non sta in una pagina continua sulla successiva, che resta bianca fino alla tavola dopo.
+  - L'anteprima mostra i fogli A4 reali, con il segno di dove comincia la pagina successiva.
+  - Un avviso dice quali tavole occupano più di una pagina.
 - **Stampa ed esporta** nel formato classico:
   - PDF (dalla stampa del browser);
   - **Word .docx vero**, con stili di paragrafo: "Titolo 1" per le tavole, "Titolo 2" per le vignette, Battuta, Didascalia, ecc.;

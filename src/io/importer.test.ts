@@ -14,6 +14,8 @@ describe('importazione', () => {
     expect(stats.pages).toBe(3);
     expect(stats.skipped).toEqual([]);
     expect(project.subtitle).toBe('Albo 1');
+    // un salto pagina prima di ogni tavola
+    expect(text.split('\f')).toHaveLength(original.pages.length + 1);
     // la sceneggiatura non contiene logline e soggetto: sono un documento a parte
     expect(text).not.toContain('LOGLINE');
     expect(project.logline).toBe('');

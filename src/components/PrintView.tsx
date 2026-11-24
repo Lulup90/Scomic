@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { pageSize } from '../model/formats';
 import { exportDocx, exportStoryDocx } from '../io/docx';
 import { buildExport, exportStoryText, exportText, fileSafeName, storyParagraphs, vignette, type ExportOptions } from '../io/exporters';
 import { CAN_PRINT, saveFile } from '../io/platform';
 import { useStore } from '../store/store';
 import { notify, openWindow } from '../store/ui';
+import { PaperSheet } from './PaperSheet';
 
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 const TXT = 'text/plain;charset=utf-8';
@@ -26,6 +27,13 @@ export function PrintView() {
   const name = fileSafeName(project.title);
   const soggetto = storyParagraphs(project.soggetto);
   const storyEmpty = !project.logline.trim() && soggetto.length === 0;
+  // Pagine occupate da ogni tavola nell'anteprima (misurate sul foglio A4)
+  const [sheetPages, setSheetPages] = useState<Record<number, number>>({});
+  const reportPages = useCallback((n: number, pagesCount: number) => {
+    setSheetPages((m) => (m[n] === pagesCount ? m : { ...m, [n]: pagesCount }));
+  }, []);
+  const long = pages.filter((p) => (sheetPages[p.number] ?? 1) > 1);
+  const totalPages = 1 + pages.reduce((a, p) => a + (sheetPages[p.number] ?? 1), 0);
 
   const pdfNote = !CAN_PRINT && (
     <p className="muted small">
@@ -99,44 +107,59 @@ export function PrintView() {
       </div>
 
       {doc === 'sceneggiatura' ? (
-        <article className="paper" aria-label="Anteprima della sceneggiatura">
-          <header className="paper-title">
-            <h1>{project.title}</h1>
-            {project.subtitle && <p>{project.subtitle}</p>}
-            {project.author && <p>di {project.author}</p>}
-            <p className="small">
-              Formato {size.name} ({size.label}) · {project.pages.length} tavole
-            </p>
-          </header>
-          {pages.map((p) => (
-            <section key={p.number} className="paper-page">
-              <h2>
-                TAVOLA {p.number} <span className="small">({vignette(p.panelCount)})</span>
-              </h2>
-              {opts.includeNotes && p.notes.trim() && <p className="paper-note">{p.notes}</p>}
-              {p.panels.map((v) => (
-                <div key={v.number} className="paper-panel">
-                  <h3>
-                    VIGNETTA {v.number}
-                    {v.heading && <> — {v.heading}</>}
-                  </h3>
+        <>
+          <div className={`page-info no-print${long.length ? ' warn' : ''}`}>
+            {long.length === 0
+              ? `Ogni tavola sta in una pagina: ${totalPages} pagine in tutto, frontespizio compreso.`
+              : `${long.map((p) => `Tavola ${p.number} (${sheetPages[p.number]} pagine)`).join(', ')}: non ${long.length === 1 ? 'sta' : 'stanno'} in una pagina e ${long.length === 1 ? 'continua' : 'continuano'} sulla successiva, che resta bianca fino alla tavola dopo. ${totalPages} pagine in tutto.`}
+          </div>
+          <div className="sheets-scroll">
+            <article className="paper sheets" aria-label="Anteprima della sceneggiatura, una tavola per pagina">
+              <PaperSheet label="Frontespizio" breakBefore={false}>
+                <header className="paper-title">
+                  <h1>{project.title}</h1>
+                  {project.subtitle && <p>{project.subtitle}</p>}
+                  {project.author && <p>di {project.author}</p>}
                   <p className="small">
-                    {v.size}
-                    {v.details.length > 0 && <> · {v.details.join(' · ')}</>}
+                    Formato {size.name} ({size.label}) · {project.pages.length} tavole
                   </p>
-                  {v.description.trim() && <p className="paper-desc">{v.description}</p>}
-                  {v.elements.map((e, i) => (
-                    <p key={i} className={`paper-el paper-el-${e.kind}`}>
-                      <b>{e.label}:</b> {e.text}
-                    </p>
-                  ))}
-                </div>
+                </header>
+              </PaperSheet>
+              {pages.map((p) => (
+                <PaperSheet key={p.number} label={`Tavola ${p.number}`} onPages={(n) => reportPages(p.number, n)}>
+                  <div className="paper-page">
+                    <h2>
+                      TAVOLA {p.number} <span className="small">({vignette(p.panelCount)})</span>
+                    </h2>
+                    {opts.includeNotes && p.notes.trim() && <p className="paper-note">{p.notes}</p>}
+                    {p.panels.map((v) => (
+                      <div key={v.number} className="paper-panel">
+                        <h3>
+                          VIGNETTA {v.number}
+                          {v.heading && <> — {v.heading}</>}
+                        </h3>
+                        <p className="small">
+                          {v.size}
+                          {v.details.length > 0 && <> · {v.details.join(' · ')}</>}
+                        </p>
+                        {v.description.trim() && <p className="paper-desc">{v.description}</p>}
+                        {v.elements.map((e, i) => (
+                          <p key={i} className={`paper-el paper-el-${e.kind}`}>
+                            <b>{e.label}:</b> {e.text}
+                          </p>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </PaperSheet>
               ))}
-            </section>
-          ))}
-        </article>
+            </article>
+          </div>
+        </>
       ) : (
-        <article className="paper paper-story-doc" aria-label="Anteprima di soggetto e logline">
+        <div className="sheets-scroll">
+        <article className="paper sheets paper-story-doc" aria-label="Anteprima di soggetto e logline">
+          <PaperSheet label="Soggetto e logline" breakBefore={false}>
           <header className="paper-title">
             <h1>{project.title}</h1>
             {project.subtitle && <p>{project.subtitle}</p>}
@@ -169,7 +192,9 @@ export function PrintView() {
               ))}
             </section>
           )}
+          </PaperSheet>
         </article>
+        </div>
       )}
     </main>
   );

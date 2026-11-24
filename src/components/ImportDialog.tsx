@@ -82,14 +82,14 @@ export function ImportDialog() {
       return;
     unlink();
     useStore.getState().loadProject(result.project);
-    notify(`Importate ${result.stats.pages} tavole e ${result.stats.panels} vignette.`);
+    notify(`Importat${result.stats.pages === 1 ? 'a 1 tavola' : `e ${result.stats.pages} tavole`} e ${result.stats.panels} ${result.stats.panels === 1 ? 'vignetta' : 'vignette'}.`);
     close();
   }
 
   function importAppend() {
     if (!result) return;
     appendImported(result.project);
-    notify(`Aggiunte ${result.stats.pages} tavole in fondo al progetto.`);
+    notify(result.stats.pages === 1 ? 'Aggiunta 1 tavola in fondo al progetto.' : `Aggiunte ${result.stats.pages} tavole in fondo al progetto.`);
     close();
   }
 

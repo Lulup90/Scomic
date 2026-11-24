@@ -27,6 +27,16 @@ describe('esportazione .docx', () => {
     expect(xml).not.toContain('LOGLINE');
   });
 
+  it('ogni tavola comincia su una pagina nuova', async () => {
+    const bytes = (await buildDocx(sampleProject(), { repeatInherited: true, includeNotes: true }, 'uint8array')) as Uint8Array;
+    const zip = await JSZip.loadAsync(bytes);
+    const styles = await zip.file('word/styles.xml')!.async('string');
+    const heading1 = styles.slice(styles.indexOf('w:styleId="Heading1"'));
+    expect(heading1.slice(0, heading1.indexOf('</w:style>'))).toContain('<w:pageBreakBefore/>');
+    const xml = await zip.file('word/document.xml')!.async('string');
+    expect(xml.match(/<w:pStyle w:val="Heading1"\/>/g)).toHaveLength(3);
+  });
+
   it('logline e soggetto vanno in un documento Word separato', () => {
     const original = sampleProject();
     const { project } = parseScript(docxXmlToText(storyDocumentXml(original)));
