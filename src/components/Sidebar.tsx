@@ -15,6 +15,7 @@ import {
 } from '../store/actions';
 import { useResolved } from '../store/derived';
 import { useStore } from '../store/store';
+import { askConfirm } from '../store/ui';
 import { IconCopy, IconDown, IconPlus, IconTrash, IconUp, IconWarn } from './icons';
 
 function plural(n: number, one: string, many: string) {
@@ -88,8 +89,8 @@ function PageTree() {
                       className="icon-btn"
                       aria-label="Elimina tavola"
                       disabled={project.pages.length === 1}
-                      onClick={() => {
-                        if (confirm(`Eliminare la tavola ${i + 1} con tutto il suo testo?`)) deletePage(page.id);
+                      onClick={async () => {
+                        if (await askConfirm(`Eliminare la tavola ${i + 1} con tutto il suo testo?`, 'Elimina', true)) deletePage(page.id);
                       }}
                     >
                       <IconTrash size={14} />

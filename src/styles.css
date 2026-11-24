@@ -83,6 +83,14 @@
 * {
   box-sizing: border-box;
 }
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 21;
+  background: var(--bar);
+}
 html,
 body {
   margin: 0;
@@ -231,7 +239,7 @@ kbd {
   background: var(--bar);
   color: var(--bar-ink);
   position: sticky;
-  top: 0;
+  top: env(safe-area-inset-top, 0px);
   z-index: 20;
 }
 .brand {
@@ -1061,7 +1069,7 @@ kbd {
 }
 
 .sheet-wrap {
-  padding-left: 58px;
+  padding-left: 66px;
 }
 .sheet {
   width: 100%;
@@ -1082,7 +1090,7 @@ kbd {
   right: calc(100% + 16px + 8px);
   top: 0;
   bottom: 0;
-  width: 50px;
+  width: 58px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1182,7 +1190,7 @@ kbd {
   outline: none;
 }
 .hint {
-  margin: 0 0 0 58px;
+  margin: 0 0 0 66px;
   font-size: 12px;
   color: var(--muted);
   line-height: 1.45;
@@ -1552,4 +1560,59 @@ kbd {
   .print-view {
     padding: 16px;
   }
+}
+
+/* --- Conferme e avvisi ------------------------------------------------ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(20, 20, 22, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal {
+  width: min(440px, 100%);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal p {
+  margin: 0;
+  line-height: 1.5;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btn.primary.danger {
+  background: #b42318;
+  border-color: #b42318;
+  color: #ffffff;
+}
+.toast-area {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 60;
+  width: max-content;
+  max-width: calc(100% - 32px);
+}
+.toast {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  box-shadow: var(--shadow);
 }

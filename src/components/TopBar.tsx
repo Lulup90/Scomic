@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { emptyProject, sampleProject } from '../model/factory';
 import { fmtNum } from '../model/formats';
-import { download, openProjectFile } from '../io/files';
+import { openProjectFile } from '../io/files';
 import { fileSafeName } from '../io/exporters';
+import { saveFile } from '../io/platform';
 import { setMeta, setThreshold } from '../store/actions';
 import { useStore, type View } from '../store/store';
+import { askConfirm, notify } from '../store/ui';
 import { IconLogo, IconRedo, IconUndo } from './icons';
 
 const VIEWS: { key: View; label: string }[] = [
@@ -74,8 +76,9 @@ export function TopBar() {
               <button
                 type="button"
                 role="menuitem"
-                onClick={run(() => {
-                  if (confirm('Iniziare un nuovo progetto? Salva prima su file quello attuale se vuoi conservarlo.')) useStore.getState().loadProject(emptyProject());
+                onClick={run(async () => {
+                  if (await askConfirm('Iniziare un nuovo progetto? Il progetto attuale verrà sostituito: salvalo prima su file se vuoi conservarlo.', 'Nuovo progetto', true))
+                    useStore.getState().loadProject(emptyProject());
                 })}
               >
                 Nuovo progetto
@@ -87,8 +90,9 @@ export function TopBar() {
                   try {
                     const p = await openProjectFile();
                     useStore.getState().loadProject(p);
+                    notify(`Aperto "${p.title}".`);
                   } catch (e) {
-                    if (e instanceof Error && e.message !== 'Nessun file scelto.') alert(e.message);
+                    if (e instanceof Error && e.message !== 'Nessun file scelto.') notify(e.message);
                   }
                 })}
               >
@@ -97,7 +101,10 @@ export function TopBar() {
               <button
                 type="button"
                 role="menuitem"
-                onClick={run(() => download(`${fileSafeName(project.title)}.tavole.json`, JSON.stringify(project, null, 2), 'application/json'))}
+                onClick={run(async () => {
+                  const r = await saveFile(`${fileSafeName(project.title)}.tavole.json`, JSON.stringify(project, null, 2), 'application/json');
+                  if (r === 'unavailable') notify('Qui non è possibile salvare file. Il progetto resta salvato in questo browser.');
+                })}
               >
                 Salva su file
               </button>
@@ -105,8 +112,9 @@ export function TopBar() {
               <button
                 type="button"
                 role="menuitem"
-                onClick={run(() => {
-                  if (confirm('Caricare la storia d’esempio? Il progetto attuale verrà sostituito.')) useStore.getState().loadProject(sampleProject());
+                onClick={run(async () => {
+                  if (await askConfirm('Caricare la storia d’esempio? Il progetto attuale verrà sostituito.', 'Carica l’esempio', true))
+                    useStore.getState().loadProject(sampleProject());
                 })}
               >
                 Carica l&apos;esempio

@@ -5,6 +5,7 @@ import type { FormatKey, Page } from '../model/types';
 import { applyPageTemplate, resizePanel, resizeStrip, setCustomSize, setFormat } from '../store/actions';
 import { useResolved } from '../store/derived';
 import { useStore } from '../store/store';
+import { askConfirm } from '../store/ui';
 import { IconWarn } from './icons';
 import { MiniLayout } from './MiniPage';
 
@@ -24,17 +25,18 @@ export function PagePreview() {
   const selLoc = sel && sel.pageId === pageId ? locate(page, sel.panel.id) : null;
   const dense = rpage.panels.filter((p) => p.dense);
 
-  function chooseTemplate(t: LayoutTemplate) {
+  async function chooseTemplate(t: LayoutTemplate) {
     const slots = templateSlots(t);
     const n = rpage.panels.length;
+    const id = page!.id;
     if (slots !== n) {
       const msg =
         slots > n
-          ? `La griglia "${t.name}" ha ${slots} spazi e la tavola ${n} vignette: verranno aggiunte ${slots - n} vignette vuote. Continuare?`
-          : `La griglia "${t.name}" ha ${slots} spazi e la tavola ${n} vignette: le ${n - slots} in più finiranno nell'ultima striscia. Continuare?`;
-      if (!confirm(msg)) return;
+          ? `La griglia "${t.name}" ha ${slots} spazi e la tavola ${n} vignette: verranno aggiunte ${slots - n} vignette vuote.`
+          : `La griglia "${t.name}" ha ${slots} spazi e la tavola ${n} vignette: le ${n - slots} in più finiranno nell'ultima striscia.`;
+      if (!(await askConfirm(msg, 'Applica la griglia'))) return;
     }
-    applyPageTemplate(page!.id, t);
+    applyPageTemplate(id, t);
   }
 
   /** Trascinamento del bordo tra due vignette (orizzontale) o tra due strisce (verticale). */

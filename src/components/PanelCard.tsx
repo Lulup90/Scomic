@@ -5,6 +5,7 @@ import { usedValues, type ResolvedPanel } from '../model/resolve';
 import { FIELD_KEYS, FIELD_LABELS, INHERITABLE, type FieldKey } from '../model/types';
 import { addElement, addPanel, deletePanel, ensurePlace, movePanel, setDescription, setField } from '../store/actions';
 import { useStore } from '../store/store';
+import { askConfirm } from '../store/ui';
 import { AutoInput } from './AutoInput';
 import { AutoTextarea } from './AutoTextarea';
 import { ElementRow } from './ElementRow';
@@ -61,9 +62,10 @@ export const PanelCard = memo(function PanelCard({ rp, selected, isFirst, isLast
             className="icon-btn"
             aria-label="Elimina vignetta"
             disabled={!canDelete}
-            onClick={() => {
+            onClick={async () => {
               const hasContent = panel.description.trim() || panel.elements.length;
-              if (!hasContent || confirm(`Eliminare la vignetta ${rp.number} e il suo testo?`)) deletePanel(pageId, panel.id);
+              if (!hasContent || (await askConfirm(`Eliminare la vignetta ${rp.number} e il suo testo?`, 'Elimina', true)))
+                deletePanel(pageId, panel.id);
             }}
           >
             <IconTrash size={14} />

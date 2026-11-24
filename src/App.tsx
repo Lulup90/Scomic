@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Menabo } from './components/Menabo';
+import { Overlays } from './components/Overlays';
 import { PagePreview } from './components/PagePreview';
 import { PrintView } from './components/PrintView';
 import { ScriptPage } from './components/ScriptPage';
@@ -42,6 +43,7 @@ export function App() {
       )}
       {view === 'menabo' && <Menabo />}
       {view === 'stampa' && <PrintView />}
+      <Overlays />
     </div>
   );
 }

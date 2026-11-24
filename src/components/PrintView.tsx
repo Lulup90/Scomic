@@ -1,8 +1,14 @@
 import { useMemo, useState } from 'react';
 import { pageSize } from '../model/formats';
 import { buildExport, exportText, exportWordHtml, fileSafeName, vignette, type ExportOptions } from '../io/exporters';
-import { download } from '../io/files';
+import { CAN_PRINT, saveFile, WORD_EXT } from '../io/platform';
 import { useStore } from '../store/store';
+import { notify } from '../store/ui';
+
+async function save(filename: string, content: string, mime: string) {
+  const r = await saveFile(filename, content, mime);
+  if (r === 'unavailable') notify('Qui non è possibile scaricare file.');
+}
 
 /** Sceneggiatura impaginata in formato classico, pronta da stampare o salvare in PDF. */
 export function PrintView() {
@@ -30,16 +36,27 @@ export function PrintView() {
           </label>
         </div>
         <div className="print-buttons">
-          <button type="button" className="btn primary" onClick={() => window.print()}>
-            Stampa / Salva PDF
+          {CAN_PRINT && (
+            <button type="button" className="btn primary" onClick={() => window.print()}>
+              Stampa / Salva PDF
+            </button>
+          )}
+          <button
+            type="button"
+            className={`btn${CAN_PRINT ? '' : ' primary'}`}
+            onClick={() => save(`${name}.${WORD_EXT}`, exportWordHtml(project, opts), 'application/msword')}
+          >
+            Scarica per Word (.{WORD_EXT})
           </button>
-          <button type="button" className="btn" onClick={() => download(`${name}.doc`, exportWordHtml(project, opts), 'application/msword')}>
-            Scarica per Word (.doc)
-          </button>
-          <button type="button" className="btn" onClick={() => download(`${name}.txt`, exportText(project, opts), 'text/plain;charset=utf-8')}>
+          <button type="button" className="btn" onClick={() => save(`${name}.txt`, exportText(project, opts), 'text/plain;charset=utf-8')}>
             Scarica testo (.txt)
           </button>
         </div>
+        {!CAN_PRINT && (
+          <p className="muted small">
+            Per il PDF: apri il file per Word e salvalo come PDF, oppure usa l&apos;app sul tuo computer, dove c&apos;è il pulsante di stampa.
+          </p>
+        )}
       </div>
 
       <article className="paper">
