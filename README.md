@@ -30,6 +30,12 @@ Editor per scrivere sceneggiature a fumetti, con l'anteprima della tavola in pro
   - Negli altri browser il file viene scaricato.
   - In alto c'è sempre l'indicazione di dove è salvato il lavoro.
   - Dopo molte modifiche salvate solo nel browser compare un promemoria.
+- **Passa il progetto a un'altra persona** (pulsante *Condividi*):
+  - **link** che contiene tutto il progetto compresso. Chi lo apre se lo trova in Scomic dopo una conferma. Il progetto sta dopo il `#` dell'indirizzo, che il browser non invia mai al server;
+  - **file** `.scomic.json` da allegare, oppure *Invia con…* dove il dispositivo lo permette;
+  - **Word/PDF** per chi deve solo leggere.
+
+  Chi riceve ottiene una copia: le sue modifiche non cambiano l'originale.
 - **Salvataggio automatico** anche nel browser.
 - **App installabile** dal menu File (Chrome, Edge), utilizzabile anche senza internet.
 - **Annulla e ripeti**: Ctrl+Z / Ctrl+Y.

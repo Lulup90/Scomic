@@ -2,7 +2,33 @@ import { useEffect } from 'react';
 import { Menabo } from './components/Menabo';
 import { ImportDialog } from './components/ImportDialog';
 import { Overlays } from './components/Overlays';
-import { initFileLink, save } from './io/fileLink';
+import { ShareDialog } from './components/ShareDialog';
+import { initFileLink, save, unlink } from './io/fileLink';
+import { clearIncoming, readIncoming } from './io/share';
+import { askConfirm, notify } from './store/ui';
+
+/** Apertura da un link di condivisione: chiede conferma prima di sostituire il progetto aperto. */
+async function handleIncoming() {
+  let incoming;
+  try {
+    incoming = await readIncoming(location.hash);
+  } catch (e) {
+    clearIncoming();
+    notify(e instanceof Error ? e.message : 'Il link del progetto non è valido o è incompleto.');
+    return;
+  }
+  if (!incoming) return;
+  const current = useStore.getState().project;
+  const ok = await askConfirm(
+    `Hai ricevuto il progetto "${incoming.title}" (${incoming.pages.length} ${incoming.pages.length === 1 ? 'tavola' : 'tavole'}). Vuoi aprirlo? Il progetto aperto ora ("${current.title}") verrà chiuso: se ti serve, annulla, salvalo su file e poi riapri il link.`,
+    'Apri il progetto ricevuto',
+  );
+  if (!ok) return;
+  clearIncoming();
+  unlink();
+  useStore.getState().loadProject(incoming);
+  notify(`Aperto "${incoming.title}". Salvalo su file per tenerne una copia.`);
+}
 import { PagePreview } from './components/PagePreview';
 import { PrintView } from './components/PrintView';
 import { ScriptPage } from './components/ScriptPage';
@@ -14,7 +40,10 @@ export function App() {
   const view = useStore((s) => s.view);
 
   useEffect(() => {
-    void initFileLink();
+    void initFileLink().then(handleIncoming);
+    const onHash = () => void handleIncoming();
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
   // Annulla / ripeti / salva da tastiera
@@ -53,6 +82,7 @@ export function App() {
       {view === 'menabo' && <Menabo />}
       {view === 'stampa' && <PrintView />}
       <ImportDialog />
+      <ShareDialog />
       <Overlays />
     </div>
   );

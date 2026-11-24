@@ -11,9 +11,14 @@ interface UiState {
   confirm: ConfirmRequest | null;
   notice: string | null;
   importOpen: boolean;
+  shareOpen: boolean;
 }
 
-export const useUi = create<UiState>(() => ({ confirm: null, notice: null, importOpen: false }));
+export const useUi = create<UiState>(() => ({ confirm: null, notice: null, importOpen: false, shareOpen: false }));
+
+export function openShare(open = true) {
+  useUi.setState({ shareOpen: open });
+}
 
 export function openImport(open = true) {
   useUi.setState({ importOpen: open });

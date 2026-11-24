@@ -5,7 +5,7 @@ import { canLinkFiles, openFile, reconnect, save, saveAs, unlink, useFileLink } 
 import { install, useInstall } from '../io/pwa';
 import { setMeta, setThreshold } from '../store/actions';
 import { useStore, type View } from '../store/store';
-import { askConfirm, openImport } from '../store/ui';
+import { askConfirm, openImport, openShare } from '../store/ui';
 import { IconLogo, IconRedo, IconUndo } from './icons';
 
 const VIEWS: { key: View; label: string }[] = [
@@ -67,6 +67,9 @@ export function TopBar() {
         <button type="button" className="icon-btn dark" aria-label="Ripeti (Ctrl+Y)" title="Ripeti (Ctrl+Y)" disabled={!canRedo} onClick={() => useStore.getState().redo()}>
           <IconRedo />
         </button>
+        <button type="button" className="btn dark" onClick={() => openShare()}>
+          Condividi
+        </button>
         <div className="menu" ref={menuRef}>
           <button type="button" className="btn dark" aria-expanded={menu} aria-haspopup="menu" onClick={() => setMenu((m) => !m)}>
             File
@@ -90,6 +93,9 @@ export function TopBar() {
               </button>
               <button type="button" role="menuitem" onClick={run(() => openImport())}>
                 Importa da Word o testo…
+              </button>
+              <button type="button" role="menuitem" onClick={run(() => openShare())}>
+                Passa a un&apos;altra persona…
               </button>
               <hr />
               <button type="button" role="menuitem" className="menu-row" onClick={run(() => void save())}>

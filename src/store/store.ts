@@ -134,15 +134,33 @@ function fixSelection() {
 
 // Salvataggio automatico nel browser
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
+let dirty = false;
+
+/** Scrive subito il progetto nel browser (senza aspettare la pausa nella digitazione). */
+export function flushSave() {
+  clearTimeout(saveTimer);
+  if (!dirty) return;
+  dirty = false;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(useStore.getState().project));
+    useStore.setState({ savedAt: Date.now() });
+  } catch {
+    // archivio pieno o non disponibile: il progetto resta in memoria, si può salvare su file
+  }
+}
+
 useStore.subscribe((state, prev) => {
   if (state.project === prev.project) return;
+  dirty = true;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.project));
-      useStore.setState({ savedAt: Date.now() });
-    } catch {
-      // archivio pieno o non disponibile: il progetto resta in memoria, si può salvare su file
-    }
-  }, 400);
+  // Un progetto appena aperto o importato si salva subito, le modifiche dopo una breve pausa
+  if (state.past.length === 0 && state.future.length === 0) flushSave();
+  else saveTimer = setTimeout(flushSave, 400);
 });
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', flushSave);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushSave();
+  });
+}
