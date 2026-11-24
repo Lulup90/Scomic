@@ -90,6 +90,10 @@ export interface Project {
   title: string;
   subtitle: string;
   author: string;
+  /** La storia in una o due frasi. */
+  logline: string;
+  /** Il soggetto: la trama per esteso. */
+  soggetto: string;
   format: FormatKey;
   /** Usato solo con format = 'custom' (centimetri). */
   customSize: { w: number; h: number };

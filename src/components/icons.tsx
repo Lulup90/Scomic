@@ -75,3 +75,14 @@ export const IconLogo = ({ size = 24 }: P) => (
     <path d="M3 10h18M12 10v11M3 15.5h9" />
   </svg>
 );
+export const IconChevron = ({ size = 14 }: P) => (
+  <svg {...base(size)}>
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+);
+export const IconWindow = ({ size = 14 }: P) => (
+  <svg {...base(size)}>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <path d="M3 9h18" />
+  </svg>
+);

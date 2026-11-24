@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { pageSize } from '../model/formats';
 import { exportDocx } from '../io/docx';
-import { buildExport, exportText, fileSafeName, vignette, type ExportOptions } from '../io/exporters';
+import { buildExport, exportText, fileSafeName, storyParagraphs, vignette, type ExportOptions } from '../io/exporters';
 import { CAN_PRINT, saveFile } from '../io/platform';
 import { useStore } from '../store/store';
 import { notify } from '../store/ui';
@@ -14,7 +14,7 @@ async function save(filename: string, content: string | Blob, mime: string) {
 /** Sceneggiatura impaginata in formato classico, pronta da stampare o salvare in PDF. */
 export function PrintView() {
   const project = useStore((s) => s.project);
-  const [opts, setOpts] = useState<ExportOptions>({ repeatInherited: true, includeNotes: true });
+  const [opts, setOpts] = useState<ExportOptions>({ repeatInherited: true, includeNotes: true, includeStory: true });
   const pages = useMemo(() => buildExport(project, opts), [project, opts]);
   const size = pageSize(project);
   const name = fileSafeName(project.title);
@@ -34,6 +34,10 @@ export function PrintView() {
           <label className="check">
             <input type="checkbox" checked={opts.includeNotes} onChange={(e) => setOpts({ ...opts, includeNotes: e.target.checked })} />
             Includi le note per il disegnatore
+          </label>
+          <label className="check">
+            <input type="checkbox" checked={opts.includeStory !== false} onChange={(e) => setOpts({ ...opts, includeStory: e.target.checked })} />
+            Includi logline e soggetto
           </label>
         </div>
         <div className="print-buttons">
@@ -71,6 +75,21 @@ export function PrintView() {
             Formato {size.name} ({size.label}) · {project.pages.length} tavole
           </p>
         </header>
+        {opts.includeStory !== false && project.logline.trim() && (
+          <section className="paper-story">
+            <p>
+              <b>LOGLINE:</b> {project.logline.trim()}
+            </p>
+          </section>
+        )}
+        {opts.includeStory !== false && storyParagraphs(project.soggetto).length > 0 && (
+          <section className="paper-story">
+            <h2>SOGGETTO</h2>
+            {storyParagraphs(project.soggetto).map((s, i) => (
+              <p key={i}>{s}</p>
+            ))}
+          </section>
+        )}
         {pages.map((p) => (
           <section key={p.number} className="paper-page">
             <h2>

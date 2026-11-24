@@ -126,6 +126,10 @@ export function parseScript(text: string, knownCharacters: string[] = []): Impor
   let title = '';
   let author = '';
   let subtitle = '';
+  let logline = '';
+  const soggetto: string[] = [];
+  /** Dove vanno le righe prima della prima tavola dopo "LOGLINE" o "SOGGETTO". */
+  let story: 'none' | 'logline' | 'soggetto' = 'none';
   const skipped: string[] = [];
   /** Personaggio scritto su una riga da solo (stile sceneggiatura cinematografica). */
   let pendingSpeaker: { name: string; type: ElementType } | null = null;
@@ -239,7 +243,19 @@ export function parseScript(text: string, knownCharacters: string[] = []): Impor
     // Prima della prima tavola: titolo, autore, righe di servizio
     if (!page) {
       const am = line.match(/^(?:di|testi di|soggetto e sceneggiatura di|sceneggiatura di|autore\s*:)\s*(.+)$/i);
-      if (am && title && !author) author = am[1].trim();
+      const lm = line.match(/^logline\s*:?\s*(.*)$/i);
+      const sm2 = !am && line.match(/^soggetto\b\s*:?\s*(.*)$/i);
+      if (lm) {
+        logline = lm[1].trim();
+        story = logline ? 'none' : 'logline';
+      } else if (sm2) {
+        story = 'soggetto';
+        if (sm2[1].trim()) soggetto.push(sm2[1].trim());
+      } else if (story === 'logline') {
+        logline = line;
+        story = 'none';
+      } else if (story === 'soggetto') soggetto.push(line);
+      else if (am && title && !author) author = am[1].trim();
       else if (!title && !RE_PANEL.test(line) && line.length <= 80 && !RE_ELEMENT.test(line)) title = softCase(line);
       else if (/^formato\s*:/i.test(line)) {
         /* informazione già nel progetto */
@@ -329,6 +345,8 @@ export function parseScript(text: string, knownCharacters: string[] = []): Impor
   project.title = title || 'Sceneggiatura importata';
   project.author = author;
   project.subtitle = subtitle;
+  project.logline = logline;
+  project.soggetto = soggetto.join('\n');
   project.pages = pages.map(buildPage);
   compactInherited(project);
 

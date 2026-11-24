@@ -3,6 +3,7 @@ import { Menabo } from './components/Menabo';
 import { ImportDialog } from './components/ImportDialog';
 import { Overlays } from './components/Overlays';
 import { ShareDialog } from './components/ShareDialog';
+import { StoryWindows } from './components/StoryWindows';
 import { initFileLink, save, unlink } from './io/fileLink';
 import { clearIncoming, readIncoming } from './io/share';
 import { askConfirm, notify } from './store/ui';
@@ -81,6 +82,7 @@ export function App() {
       )}
       {view === 'menabo' && <Menabo />}
       {view === 'stampa' && <PrintView />}
+      <StoryWindows />
       <ImportDialog />
       <ShareDialog />
       <Overlays />

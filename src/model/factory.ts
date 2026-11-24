@@ -31,6 +31,8 @@ export function emptyProject(): Project {
     title: 'Nuova storia',
     subtitle: '',
     author: '',
+    logline: '',
+    soggetto: '',
     format: 'bonelli',
     customSize: { w: 17, h: 24 },
     densityThreshold: 2,
@@ -152,6 +154,10 @@ export function sampleProject(): Project {
     title: 'Il porto delle nebbie',
     subtitle: 'Albo 1',
     author: '',
+    logline:
+      'Un ex marinaio, convinto che il padre sia morto in un incendio, riceve dalla donna che ama la mappa che il padre stava nascondendo: per scoprire la verità dovrà fidarsi di lei, mentre qualcuno li segue nella nebbia del porto.',
+    soggetto:
+      'Genova, novembre. Marco, trent\u2019anni, ex marinaio, vive ancora all\u2019ombra della morte del padre, scomparso nell\u2019incendio di un magazzino del porto.\nUna notte Elena, la ragazza che non vede da anni, gli dà appuntamento sul molo 7 e gli mostra una vecchia mappa del porto: è quella del padre, che tutti credevano bruciata.\nCostretti a nascondersi al Bar Ancora, i due scoprono sulla mappa una croce tracciata a matita sul faro di levante. Ma un uomo li sta seguendo, e Elena sa più di quanto dice.',
     characters: [
       { id: uid('c'), name: 'Marco', notes: 'Trent’anni, ex marinaio, cappotto scuro.' },
       { id: uid('c'), name: 'Elena', notes: 'Cappotto rosso. Sa più di quanto dice.' },

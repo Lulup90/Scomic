@@ -12,9 +12,29 @@ interface UiState {
   notice: string | null;
   importOpen: boolean;
   shareOpen: boolean;
+  /** Finestre aperte (logline, soggetto), dalla più in basso alla più in alto. */
+  windows: WindowId[];
 }
 
-export const useUi = create<UiState>(() => ({ confirm: null, notice: null, importOpen: false, shareOpen: false }));
+export type WindowId = 'logline' | 'soggetto';
+
+export const useUi = create<UiState>(() => ({ confirm: null, notice: null, importOpen: false, shareOpen: false, windows: [] }));
+
+/** Apre una finestra (o la porta davanti se è già aperta). */
+export function openWindow(id: WindowId) {
+  useUi.setState((s) => ({ windows: [...s.windows.filter((w) => w !== id), id] }));
+}
+
+export function closeWindow(id: WindowId) {
+  useUi.setState((s) => ({ windows: s.windows.filter((w) => w !== id) }));
+}
+
+export function toggleWindow(id: WindowId) {
+  const open = useUi.getState().windows;
+  // Se è aperta ma dietro un'altra, il clic la porta davanti; se è già davanti, la chiude
+  if (open[open.length - 1] === id) closeWindow(id);
+  else openWindow(id);
+}
 
 export function openShare(open = true) {
   useUi.setState({ shareOpen: open });

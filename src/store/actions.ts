@@ -31,7 +31,7 @@ function findPageDraft(project: Draft<Project>, pageId: string): Draft<Page> | u
 
 // --- Progetto -------------------------------------------------------------
 
-export function setMeta(field: 'title' | 'subtitle' | 'author', value: string) {
+export function setMeta(field: 'title' | 'subtitle' | 'author' | 'logline' | 'soggetto', value: string) {
   update((d) => {
     d[field] = value;
   }, `meta:${field}`);

@@ -14,6 +14,8 @@ describe('importazione', () => {
     expect(stats.pages).toBe(3);
     expect(stats.skipped).toEqual([]);
     expect(project.subtitle).toBe('Albo 1');
+    expect(project.logline).toBe(original.logline);
+    expect(project.soggetto).toBe(original.soggetto);
 
     const a = resolveProject(original);
     const b = resolveProject(project);
@@ -98,6 +100,16 @@ Nota: l'ombra deve essere enorme.
     ]);
     expect(stats.characters.sort()).toEqual(['Anna', 'Il Guardiano']);
     expect(stats.places.sort()).toEqual(['Faro', 'Scogliera']);
+  });
+
+  it('riconosce logline e soggetto scritti prima delle tavole', () => {
+    const { project, stats } = parseScript(
+      'IL FARO\nLogline: Una guardiana del faro aspetta un uomo che non tornerà.\n\nSOGGETTO\nAnna vive sola sul faro.\nUna notte arriva una lettera.\n\nTAVOLA 1\nVIGNETTA 1\nIl faro.',
+    );
+    expect(project.logline).toBe('Una guardiana del faro aspetta un uomo che non tornerà.');
+    expect(project.soggetto).toBe('Anna vive sola sul faro.\nUna notte arriva una lettera.');
+    expect(stats.skipped).toEqual([]);
+    expect(stats.panels).toBe(1);
   });
 
   it('senza indicazioni di vignetta mette il testo in una vignetta per tavola', () => {

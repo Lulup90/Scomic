@@ -24,5 +24,7 @@ describe('esportazione .docx', () => {
     expect(b.pages[1].panels[4].panel.elements[0].text).toBe(a.pages[1].panels[4].panel.elements[0].text);
     expect(Math.round(b.pages[1].panels[0].width)).toBe(40);
     expect(b.pages[1].panels[2].fields.luce.value).toBe('Fascio del faro, intermittente');
+    expect(project.logline).toBe(original.logline);
+    expect(project.soggetto).toBe(original.soggetto);
   });
 });

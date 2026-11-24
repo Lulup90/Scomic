@@ -3,7 +3,7 @@
 // spostamento mostra la struttura dell'albo e gli stili si possono cambiare in un colpo solo.
 import { pageSize } from '../model/formats';
 import type { Project } from '../model/types';
-import { buildExport, vignette, type ExportOptions } from './exporters';
+import { buildExport, storyParagraphs, vignette, type ExportOptions } from './exporters';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -30,6 +30,7 @@ const STYLES = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:qFormat/><w:pPr><w:jc w:val="center"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:pageBreakBefore/><w:pBdr><w:bottom w:val="single" w:sz="8" w:space="2" w:color="000000"/></w:pBdr><w:spacing w:after="200"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="280" w:after="40"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/></w:rPr></w:style>
+<w:style w:type="paragraph" w:customStyle="1" w:styleId="Sezione"><w:name w:val="Sezione"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="360" w:after="120"/></w:pPr><w:rPr><w:b/></w:rPr></w:style>
 <w:style w:type="paragraph" w:customStyle="1" w:styleId="Dettagli"><w:name w:val="Dettagli vignetta"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/></w:pPr><w:rPr><w:color w:val="555555"/><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:customStyle="1" w:styleId="NoteTavola"><w:name w:val="Note tavola"/><w:basedOn w:val="Normal"/><w:rPr><w:i/></w:rPr></w:style>
 <w:style w:type="paragraph" w:customStyle="1" w:styleId="Descrizione"><w:name w:val="Descrizione"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="80" w:after="120"/></w:pPr></w:style>
@@ -80,6 +81,15 @@ export function documentXml(project: Project, opts: ExportOptions): string {
   if (project.subtitle) body.push(para('Subtitle', runs(project.subtitle)));
   if (project.author) body.push(para('Subtitle', runs(`di ${project.author}`)));
   body.push(para('Subtitle', runs(`Formato: ${size.name} (${size.label})`, '<w:color w:val="555555"/><w:sz w:val="18"/>')));
+
+  if (opts.includeStory !== false) {
+    if (project.logline.trim()) body.push(para('Sezione', runs('LOGLINE: ', '<w:b/>') + runs(project.logline.trim(), '<w:b w:val="0"/>')));
+    const soggetto = storyParagraphs(project.soggetto);
+    if (soggetto.length) {
+      body.push(para('Sezione', runs('SOGGETTO')));
+      for (const s of soggetto) body.push(para('Descrizione', runs(s)));
+    }
+  }
 
   for (const p of pages) {
     body.push(para('Heading1', runs(`TAVOLA ${p.number}`) + runs(`  (${vignette(p.panelCount)})`, '<w:b w:val="0"/><w:sz w:val="18"/>')));

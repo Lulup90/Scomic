@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { characterLines, placeUses } from '../model/resolve';
+import { useEffect, useState } from 'react';
+import { characterLines, countWords, placeUses } from '../model/resolve';
 import {
   addPage,
   deleteCharacter,
@@ -15,8 +15,8 @@ import {
 } from '../store/actions';
 import { useResolved } from '../store/derived';
 import { useStore } from '../store/store';
-import { askConfirm } from '../store/ui';
-import { IconCopy, IconDown, IconPlus, IconTrash, IconUp, IconWarn } from './icons';
+import { askConfirm, toggleWindow, useUi, type WindowId } from '../store/ui';
+import { IconChevron, IconCopy, IconDown, IconPlus, IconTrash, IconUp, IconWarn, IconWindow } from './icons';
 
 function plural(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`;
@@ -32,6 +32,7 @@ export function Sidebar() {
       </button>
       {open && (
         <>
+          <Story />
           <PageTree />
           <Archive />
         </>
@@ -40,21 +41,75 @@ export function Sidebar() {
   );
 }
 
+/** Logline e soggetto: si aprono come finestre sopra il lavoro. */
+function Story() {
+  const logline = useStore((s) => s.project.logline);
+  const soggetto = useStore((s) => s.project.soggetto);
+  const open = useUi((s) => s.windows);
+  const words = countWords(soggetto);
+  const item = (id: WindowId, name: string, preview: string, empty: string) => (
+    <button type="button" className={`story-item${open.includes(id) ? ' open' : ''}`} aria-pressed={open.includes(id)} onClick={() => toggleWindow(id)}>
+      <span className="story-name">
+        <IconWindow size={13} />
+        {name}
+      </span>
+      <span className={`story-preview${preview ? '' : ' empty'}`}>{preview || empty}</span>
+    </button>
+  );
+  return (
+    <section className="side-section story">
+      <div className="side-head">
+        <h2>Storia</h2>
+      </div>
+      {item('logline', 'Logline', logline.trim(), 'Scrivi la storia in una frase…')}
+      {item('soggetto', 'Soggetto', words ? `${words} parole · ${soggetto.trim().split('\n')[0]}` : '', 'Scrivi la trama per esteso…')}
+    </section>
+  );
+}
+
+const TREE_KEY = 'scomic.tavoleAperte';
+
 function PageTree() {
   const project = useStore((s) => s.project);
   const pageId = useStore((s) => s.pageId);
   const panelId = useStore((s) => s.panelId);
   const resolved = useResolved();
+  const [expanded, setExpanded] = useState(() => {
+    try {
+      return localStorage.getItem(TREE_KEY) !== '0';
+    } catch {
+      return true;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(TREE_KEY, expanded ? '1' : '0');
+    } catch {
+      // non importante
+    }
+  }, [expanded]);
+  const currentNumber = project.pages.findIndex((p) => p.id === pageId) + 1;
 
   return (
     <section className="side-section">
       <div className="side-head">
-        <h2>Tavole</h2>
+        <button type="button" className="side-toggle" aria-expanded={expanded} aria-controls="tree-tavole" onClick={() => setExpanded((e) => !e)}>
+          <span className={`chev${expanded ? ' down' : ''}`} aria-hidden="true">
+            <IconChevron size={12} />
+          </span>
+          <h2>Tavole</h2>
+          <span className="side-count">{project.pages.length}</span>
+        </button>
         <button type="button" className="icon-btn" aria-label="Aggiungi tavola" title="Nuova tavola dopo quella aperta" onClick={() => addPage(pageId)}>
           <IconPlus size={14} />
         </button>
       </div>
-      <ol className="tree">
+      {!expanded && (
+        <button type="button" className="tree-collapsed" onClick={() => setExpanded(true)}>
+          Aperta: Tavola {currentNumber} di {project.pages.length}
+        </button>
+      )}
+      <ol className="tree" id="tree-tavole" hidden={!expanded}>
         {project.pages.map((page, i) => {
           const rp = resolved.byPage[page.id];
           const open = page.id === pageId;
