@@ -112,44 +112,6 @@ export function exportText(project: Project, opts: ExportOptions): string {
   return out.join('\n');
 }
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-
-/** Documento HTML che Word apre come documento modificabile (.doc). */
-export function exportWordHtml(project: Project, opts: ExportOptions): string {
-  const pages = buildExport(project, opts);
-  const size = pageSize(project);
-  const body = pages
-    .map(
-      (p) => `
-<h2>TAVOLA ${p.number} <span class="small">(${vignette(p.panelCount)})</span></h2>
-${opts.includeNotes && p.notes.trim() ? `<p class="note">${esc(p.notes)}</p>` : ''}
-${p.panels
-  .map(
-    (v) => `
-<h3>VIGNETTA ${v.number}${v.heading ? ` — ${esc(v.heading)}` : ''}</h3>
-<p class="small">${esc(v.size)}${v.details.length ? ' · ' + v.details.map(esc).join(' · ') : ''}</p>
-${v.description.trim() ? `<p class="desc">${esc(v.description)}</p>` : ''}
-${v.elements.map((e) => `<p class="el"><b>${esc(e.label)}:</b> ${esc(e.text)}</p>`).join('')}
-`,
-  )
-  .join('')}`,
-    )
-    .join('<br style="page-break-before:always">');
-  return `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>${esc(project.title)}</title>
-<style>
-body{font-family:'Courier New',Courier,monospace;font-size:12pt;line-height:1.4}
-h1{font-size:18pt;text-align:center}h2{font-size:14pt;border-bottom:1px solid #000;margin-top:24pt}
-h3{font-size:12pt;margin:14pt 0 2pt}.small{font-size:9pt;color:#444;font-weight:normal}
-.desc{margin:4pt 0}.el{margin:2pt 0 2pt 36pt}.note{font-style:italic}
-</style></head><body>
-<h1>${esc(project.title)}</h1>
-${project.subtitle ? `<p style="text-align:center">${esc(project.subtitle)}</p>` : ''}
-${project.author ? `<p style="text-align:center">di ${esc(project.author)}</p>` : ''}
-<p style="text-align:center" class="small">Formato: ${esc(size.name)} (${esc(size.label)})</p>
-${body}
-</body></html>`;
-}
-
 export function vignette(n: number): string {
   return `${n} ${n === 1 ? 'vignetta' : 'vignette'}`;
 }

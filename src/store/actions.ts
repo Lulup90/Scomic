@@ -334,3 +334,16 @@ export function deletePlace(id: string) {
     d.places = d.places.filter((c) => c.id !== id);
   });
 }
+
+/** Aggiunge in fondo le tavole di un progetto importato, unendo personaggi e luoghi. */
+export function appendImported(imported: Project) {
+  const firstId = imported.pages[0]?.id;
+  update((d) => {
+    d.pages.push(...(JSON.parse(JSON.stringify(imported.pages)) as Page[]));
+    for (const c of imported.characters)
+      if (!d.characters.some((x) => x.name.toLowerCase() === c.name.toLowerCase())) d.characters.push({ ...c, id: uid('c') });
+    for (const p of imported.places)
+      if (!d.places.some((x) => x.name.toLowerCase() === p.name.toLowerCase())) d.places.push({ ...p, id: uid('l') });
+  });
+  if (firstId) useStore.getState().selectPage(firstId);
+}

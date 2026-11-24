@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import { pageSize } from '../model/formats';
-import { buildExport, exportText, exportWordHtml, fileSafeName, vignette, type ExportOptions } from '../io/exporters';
-import { CAN_PRINT, saveFile, WORD_EXT } from '../io/platform';
+import { exportDocx } from '../io/docx';
+import { buildExport, exportText, fileSafeName, vignette, type ExportOptions } from '../io/exporters';
+import { CAN_PRINT, saveFile } from '../io/platform';
 import { useStore } from '../store/store';
 import { notify } from '../store/ui';
 
-async function save(filename: string, content: string, mime: string) {
+async function save(filename: string, content: string | Blob, mime: string) {
   const r = await saveFile(filename, content, mime);
   if (r === 'unavailable') notify('Qui non è possibile scaricare file.');
 }
@@ -44,9 +45,11 @@ export function PrintView() {
           <button
             type="button"
             className={`btn${CAN_PRINT ? '' : ' primary'}`}
-            onClick={() => save(`${name}.${WORD_EXT}`, exportWordHtml(project, opts), 'application/msword')}
+            onClick={async () =>
+              save(`${name}.docx`, await exportDocx(project, opts), 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+            }
           >
-            Scarica per Word (.{WORD_EXT})
+            Scarica Word (.docx)
           </button>
           <button type="button" className="btn" onClick={() => save(`${name}.txt`, exportText(project, opts), 'text/plain;charset=utf-8')}>
             Scarica testo (.txt)
@@ -54,7 +57,7 @@ export function PrintView() {
         </div>
         {!CAN_PRINT && (
           <p className="muted small">
-            Per il PDF: apri il file per Word e salvalo come PDF, oppure usa l&apos;app sul tuo computer, dove c&apos;è il pulsante di stampa.
+            Per il PDF: apri il file Word e salvalo come PDF, oppure usa Scomic da lulup90.github.io/Scomic, dove c&apos;è il pulsante di stampa.
           </p>
         )}
       </div>

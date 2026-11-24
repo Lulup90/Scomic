@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Menabo } from './components/Menabo';
+import { ImportDialog } from './components/ImportDialog';
 import { Overlays } from './components/Overlays';
+import { initFileLink, save } from './io/fileLink';
 import { PagePreview } from './components/PagePreview';
 import { PrintView } from './components/PrintView';
 import { ScriptPage } from './components/ScriptPage';
@@ -11,13 +13,20 @@ import { useStore } from './store/store';
 export function App() {
   const view = useStore((s) => s.view);
 
-  // Annulla / ripeti da tastiera
+  useEffect(() => {
+    void initFileLink();
+  }, []);
+
+  // Annulla / ripeti / salva da tastiera
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const mod = e.ctrlKey || e.metaKey;
       if (!mod) return;
       const k = e.key.toLowerCase();
-      if (k === 'z' && !e.shiftKey) {
+      if (k === 's') {
+        e.preventDefault();
+        void save();
+      } else if (k === 'z' && !e.shiftKey) {
         e.preventDefault();
         useStore.getState().undo();
       } else if (k === 'y' || (k === 'z' && e.shiftKey)) {
@@ -43,6 +52,7 @@ export function App() {
       )}
       {view === 'menabo' && <Menabo />}
       {view === 'stampa' && <PrintView />}
+      <ImportDialog />
       <Overlays />
     </div>
   );

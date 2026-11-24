@@ -10,9 +10,14 @@ interface ConfirmRequest {
 interface UiState {
   confirm: ConfirmRequest | null;
   notice: string | null;
+  importOpen: boolean;
 }
 
-export const useUi = create<UiState>(() => ({ confirm: null, notice: null }));
+export const useUi = create<UiState>(() => ({ confirm: null, notice: null, importOpen: false }));
+
+export function openImport(open = true) {
+  useUi.setState({ importOpen: open });
+}
 
 /**
  * Chiede conferma con una finestra dentro l'app (al posto di window.confirm,

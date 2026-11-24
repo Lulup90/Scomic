@@ -1616,3 +1616,137 @@ kbd {
   font-size: 13px;
   box-shadow: var(--shadow);
 }
+
+/* --- Stato del salvataggio --------------------------------------------- */
+.save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: none;
+  color: var(--bar-muted);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  max-width: 340px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+button.save-status:hover {
+  background: var(--bar-2);
+  color: var(--bar-ink);
+}
+.save-status .dot {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #8b887f;
+}
+.save-status.ok .dot {
+  background: #4ade80;
+}
+.save-status.warn {
+  color: #fcd9a8;
+}
+.save-status.warn .dot {
+  background: #f59e0b;
+}
+.menu-list > .menu-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- Importazione --------------------------------------------------------- */
+.import-modal {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  gap: 12px;
+}
+.import-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.import-head h2 {
+  font-family: var(--display);
+  font-size: 22px;
+}
+.import-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.import-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-2);
+}
+.import-text {
+  width: 100%;
+  min-height: 180px;
+  resize: vertical;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.import-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--soft);
+}
+.import-preview p {
+  margin: 0;
+  line-height: 1.5;
+}
+.import-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 13px;
+}
+.import-stats b {
+  font-family: var(--display);
+  font-size: 18px;
+}
+.import-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.import-thumb {
+  width: 40px;
+  aspect-ratio: 16 / 21;
+  background: var(--paper);
+  padding: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.import-thumb .mini-cell {
+  border-width: 1px;
+}
+.import-help pre {
+  background: var(--soft);
+  padding: 10px;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+.import-help p {
+  line-height: 1.5;
+}

@@ -7,11 +7,8 @@ export const IS_ARTIFACT = import.meta.env.MODE === 'artifact';
 /** La stampa del browser (e quindi "Salva come PDF") è disponibile. */
 export const CAN_PRINT = !IS_ARTIFACT;
 
-/** Estensione del file per Word: .doc nell'app, .html dove .doc non è ammesso. */
-export const WORD_EXT = IS_ARTIFACT ? 'html' : 'doc';
-
 interface DownloadsApi {
-  save(req: { filename: string; data: string }): Promise<unknown>;
+  save(req: { filename: string; data: string | Blob }): Promise<unknown>;
 }
 interface ClaudeHost {
   use(name: string): Promise<DownloadsApi | null>;
@@ -30,7 +27,7 @@ function getDownloads(): Promise<DownloadsApi | null> {
 export type SaveOutcome = 'saved' | 'declined' | 'unavailable';
 
 /** Salva un file sul computer dell'utente. */
-export async function saveFile(filename: string, content: string, mime: string): Promise<SaveOutcome> {
+export async function saveFile(filename: string, content: string | Blob, mime: string): Promise<SaveOutcome> {
   if (!IS_ARTIFACT) {
     download(filename, content, mime);
     return 'saved';

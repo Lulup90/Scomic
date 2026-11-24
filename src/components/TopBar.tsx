@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { emptyProject, sampleProject } from '../model/factory';
 import { fmtNum } from '../model/formats';
-import { openProjectFile } from '../io/files';
-import { fileSafeName } from '../io/exporters';
-import { saveFile } from '../io/platform';
+import { canLinkFiles, openFile, reconnect, save, saveAs, unlink, useFileLink } from '../io/fileLink';
+import { install, useInstall } from '../io/pwa';
 import { setMeta, setThreshold } from '../store/actions';
 import { useStore, type View } from '../store/store';
-import { askConfirm, notify } from '../store/ui';
+import { askConfirm, openImport } from '../store/ui';
 import { IconLogo, IconRedo, IconUndo } from './icons';
 
 const VIEWS: { key: View; label: string }[] = [
@@ -20,9 +19,10 @@ export function TopBar() {
   const view = useStore((s) => s.view);
   const canUndo = useStore((s) => s.past.length > 0);
   const canRedo = useStore((s) => s.future.length > 0);
-  const savedAt = useStore((s) => s.savedAt);
   const [menu, setMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const linkable = canLinkFiles();
+  const installable = useInstall((s) => s.prompt !== null);
 
   useEffect(() => {
     if (!menu) return;
@@ -48,7 +48,7 @@ export function TopBar() {
         <input className="title-input" aria-label="Titolo della storia" value={project.title} onChange={(e) => setMeta('title', e.target.value)} />
         <span className="saved">
           <input className="subtitle-input" aria-label="Sottotitolo (es. numero dell'albo)" placeholder="Albo / episodio" value={project.subtitle} onChange={(e) => setMeta('subtitle', e.target.value)} />
-          <span aria-live="polite">{savedAt ? '· salvato nel browser' : ''}</span>
+          <SaveStatus />
         </span>
       </div>
 
@@ -77,48 +77,48 @@ export function TopBar() {
                 type="button"
                 role="menuitem"
                 onClick={run(async () => {
-                  if (await askConfirm('Iniziare un nuovo progetto? Il progetto attuale verrà sostituito: salvalo prima su file se vuoi conservarlo.', 'Nuovo progetto', true))
+                  if (await askConfirm('Iniziare un nuovo progetto? Quello aperto verrà chiuso: salvalo prima su file se vuoi conservarlo.', 'Nuovo progetto', true)) {
+                    unlink();
                     useStore.getState().loadProject(emptyProject());
+                  }
                 })}
               >
                 Nuovo progetto
               </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={run(async () => {
-                  try {
-                    const p = await openProjectFile();
-                    useStore.getState().loadProject(p);
-                    notify(`Aperto "${p.title}".`);
-                  } catch (e) {
-                    if (e instanceof Error && e.message !== 'Nessun file scelto.') notify(e.message);
-                  }
-                })}
-              >
-                Apri file…
+              <button type="button" role="menuitem" onClick={run(() => void openFile())}>
+                Apri progetto…
               </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={run(async () => {
-                  const r = await saveFile(`${fileSafeName(project.title)}.scomic.json`, JSON.stringify(project, null, 2), 'application/json');
-                  if (r === 'unavailable') notify('Qui non è possibile salvare file. Il progetto resta salvato in questo browser.');
-                })}
-              >
-                Salva su file
+              <button type="button" role="menuitem" onClick={run(() => openImport())}>
+                Importa da Word o testo…
               </button>
+              <hr />
+              <button type="button" role="menuitem" className="menu-row" onClick={run(() => void save())}>
+                <span>Salva</span>
+                <kbd>Ctrl+S</kbd>
+              </button>
+              {linkable && (
+                <button type="button" role="menuitem" onClick={run(() => void saveAs())}>
+                  Salva con nome…
+                </button>
+              )}
               <hr />
               <button
                 type="button"
                 role="menuitem"
                 onClick={run(async () => {
-                  if (await askConfirm('Caricare la storia d’esempio? Il progetto attuale verrà sostituito.', 'Carica l’esempio', true))
+                  if (await askConfirm('Caricare la storia d’esempio? Il progetto aperto verrà chiuso.', 'Carica l’esempio', true)) {
+                    unlink();
                     useStore.getState().loadProject(sampleProject());
+                  }
                 })}
               >
                 Carica l&apos;esempio
               </button>
+              {installable && (
+                <button type="button" role="menuitem" onClick={run(() => void install())}>
+                  Installa Scomic come app
+                </button>
+              )}
               <hr />
               <label className="menu-setting">
                 <span>Soglia &quot;troppo testo&quot;</span>
@@ -134,5 +134,53 @@ export function TopBar() {
         </div>
       </div>
     </header>
+  );
+}
+
+const time = (t: number) => new Date(t).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+/** Dove è al sicuro il lavoro: file collegato, solo nel browser, ecc. */
+function SaveStatus() {
+  const { name, status, savedAt, pending } = useFileLink();
+
+  if (status === 'needs-permission' && name) {
+    return (
+      <button type="button" className="save-status warn" onClick={() => void reconnect()} title="Il browser chiede di nuovo il permesso di scrivere nel file">
+        <span className="dot" aria-hidden="true" />
+        Ricollega {name}
+      </button>
+    );
+  }
+  if (status === 'error' && name) {
+    return (
+      <button type="button" className="save-status warn" onClick={() => void save()}>
+        <span className="dot" aria-hidden="true" />
+        Errore nel salvare {name}: riprova
+      </button>
+    );
+  }
+  if (name) {
+    return (
+      <span className="save-status ok" aria-live="polite" title={`Ogni modifica viene salvata in ${name}`}>
+        <span className="dot" aria-hidden="true" />
+        {status === 'saving' ? 'Salvataggio…' : `${name}${savedAt ? ` · salvato alle ${time(savedAt)}` : ''}`}
+      </span>
+    );
+  }
+  const unsaved = pending > 0;
+  return (
+    <button
+      type="button"
+      className={`save-status ${pending >= 15 ? 'warn' : 'neutral'}`}
+      onClick={() => void save()}
+      title="Il progetto è salvato in questo browser. Clicca per salvarlo anche su file."
+    >
+      <span className="dot" aria-hidden="true" />
+      {savedAt
+        ? `File salvato alle ${time(savedAt)}${unsaved ? ' · ci sono modifiche nuove' : ''}`
+        : unsaved
+          ? 'Solo nel browser · salva su file'
+          : 'Salvato nel browser'}
+    </button>
   );
 }
