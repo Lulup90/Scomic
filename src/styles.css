@@ -1982,3 +1982,57 @@ button.save-status:hover {
     cursor: default;
   }
 }
+
+/* --- Documenti da esportare ------------------------------------------------ */
+.doc-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+.doc-switch button {
+  border: 0;
+  background: transparent;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--muted-2);
+}
+.doc-switch button[aria-selected='true'] {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.story-empty {
+  font-family: Inter, system-ui, sans-serif;
+  border: 1px dashed #b9b6ae;
+  border-radius: 8px;
+  padding: 16px;
+  color: #444;
+}
+.story-empty p {
+  margin: 0 0 10px;
+}
+.paper-story-doc .paper-story h2 {
+  font-size: 16px;
+  border-bottom: 1px solid #111;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+.paper-story-doc .paper-story {
+  margin-bottom: 28px;
+}
+@media print {
+  .float-window,
+  .modal-backdrop,
+  .toast-area {
+    display: none !important;
+  }
+}

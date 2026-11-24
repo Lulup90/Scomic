@@ -82,15 +82,6 @@ export function documentXml(project: Project, opts: ExportOptions): string {
   if (project.author) body.push(para('Subtitle', runs(`di ${project.author}`)));
   body.push(para('Subtitle', runs(`Formato: ${size.name} (${size.label})`, '<w:color w:val="555555"/><w:sz w:val="18"/>')));
 
-  if (opts.includeStory !== false) {
-    if (project.logline.trim()) body.push(para('Sezione', runs('LOGLINE: ', '<w:b/>') + runs(project.logline.trim(), '<w:b w:val="0"/>')));
-    const soggetto = storyParagraphs(project.soggetto);
-    if (soggetto.length) {
-      body.push(para('Sezione', runs('SOGGETTO')));
-      for (const s of soggetto) body.push(para('Descrizione', runs(s)));
-    }
-  }
-
   for (const p of pages) {
     body.push(para('Heading1', runs(`TAVOLA ${p.number}`) + runs(`  (${vignette(p.panelCount)})`, '<w:b w:val="0"/><w:sz w:val="18"/>')));
     if (opts.includeNotes && p.notes.trim()) body.push(para('NoteTavola', runs(`Note: ${p.notes.trim()}`)));
@@ -104,25 +95,57 @@ export function documentXml(project: Project, opts: ExportOptions): string {
     }
   }
 
-  // A4 verticale, margini di 2,5 cm
-  const sect =
-    '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1418" w:right="1418" w:bottom="1418" w:left="1418" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr>';
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body.join('')}${sect}</w:body></w:document>`;
+  return wrapDocument(body);
 }
 
-/** Crea il file .docx e lo restituisce come Blob. */
+// A4 verticale, margini di 2,5 cm
+const SECT =
+  '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1418" w:right="1418" w:bottom="1418" w:left="1418" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr>';
+
+function wrapDocument(body: string[]): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body.join('')}${SECT}</w:body></w:document>`;
+}
+
+/** Documento separato con logline e soggetto (non fa parte della sceneggiatura). */
+export function storyDocumentXml(project: Project): string {
+  const body: string[] = [];
+  body.push(para('Title', runs(project.title)));
+  if (project.subtitle) body.push(para('Subtitle', runs(project.subtitle)));
+  if (project.author) body.push(para('Subtitle', runs(`di ${project.author}`)));
+  if (project.logline.trim()) {
+    body.push(para('Sezione', runs('LOGLINE')));
+    body.push(para('Descrizione', runs(project.logline.trim())));
+  }
+  const soggetto = storyParagraphs(project.soggetto);
+  if (soggetto.length) {
+    body.push(para('Sezione', runs('SOGGETTO')));
+    for (const s of soggetto) body.push(para('Descrizione', runs(s)));
+  }
+  return wrapDocument(body);
+}
+
+/** Crea il file .docx della sceneggiatura e lo restituisce come Blob. */
 export async function exportDocx(project: Project, opts: ExportOptions): Promise<Blob> {
   return (await buildDocx(project, opts, 'blob')) as Blob;
 }
 
+/** Crea il file .docx con logline e soggetto. */
+export async function exportStoryDocx(project: Project): Promise<Blob> {
+  return (await packDocx(project, storyDocumentXml(project), 'blob')) as Blob;
+}
+
 export async function buildDocx(project: Project, opts: ExportOptions, type: 'blob' | 'uint8array'): Promise<Blob | Uint8Array> {
+  return packDocx(project, documentXml(project, opts), type);
+}
+
+export async function packDocx(project: Project, document: string, type: 'blob' | 'uint8array'): Promise<Blob | Uint8Array> {
   const { default: JSZip } = await import('jszip');
   const zip = new JSZip();
   zip.file('[Content_Types].xml', CONTENT_TYPES);
   zip.file('_rels/.rels', ROOT_RELS);
   zip.file('docProps/core.xml', coreXml(project));
-  zip.file('word/document.xml', documentXml(project, opts));
+  zip.file('word/document.xml', document);
   zip.file('word/styles.xml', STYLES);
   zip.file('word/_rels/document.xml.rels', DOC_RELS);
   return zip.generateAsync({

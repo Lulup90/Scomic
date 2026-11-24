@@ -7,8 +7,6 @@ export interface ExportOptions {
   /** Ripete in ogni vignetta anche i dati ripresi dalla precedente. */
   repeatInherited: boolean;
   includeNotes: boolean;
-  /** Mette logline e soggetto prima delle tavole (predefinito: sì). */
-  includeStory?: boolean;
 }
 
 export interface ExportPanel {
@@ -97,11 +95,6 @@ export function exportText(project: Project, opts: ExportOptions): string {
   if (project.subtitle) out.push(project.subtitle);
   if (project.author) out.push(`di ${project.author}`);
   out.push(`Formato: ${size.name} (${size.label})`, '');
-  if (opts.includeStory !== false) {
-    if (project.logline.trim()) out.push(`LOGLINE: ${project.logline.trim()}`, '');
-    const soggetto = storyParagraphs(project.soggetto);
-    if (soggetto.length) out.push('SOGGETTO', ...soggetto, '');
-  }
   for (const p of pages) {
     out.push('='.repeat(48), `TAVOLA ${p.number}  (${vignette(p.panelCount)})`, '='.repeat(48));
     if (opts.includeNotes && p.notes.trim()) out.push(`Note: ${p.notes.trim()}`);
@@ -125,6 +118,18 @@ export function storyParagraphs(text: string): string[] {
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean);
+}
+
+/** Logline e soggetto come documento a sé, separato dalla sceneggiatura. */
+export function exportStoryText(project: Project): string {
+  const out: string[] = [project.title.toUpperCase()];
+  if (project.subtitle) out.push(project.subtitle);
+  if (project.author) out.push(`di ${project.author}`);
+  out.push('');
+  if (project.logline.trim()) out.push('LOGLINE', project.logline.trim(), '');
+  const soggetto = storyParagraphs(project.soggetto);
+  if (soggetto.length) out.push('SOGGETTO', ...soggetto, '');
+  return out.join('\n');
 }
 
 export function vignette(n: number): string {

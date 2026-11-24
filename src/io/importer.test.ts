@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { sampleProject } from '../model/factory';
 import { resolveProject } from '../model/resolve';
-import { exportText } from './exporters';
+import { exportStoryText, exportText } from './exporters';
 import { docxXmlToText, parseScript, softCase } from './importer';
 
 describe('importazione', () => {
@@ -14,8 +14,9 @@ describe('importazione', () => {
     expect(stats.pages).toBe(3);
     expect(stats.skipped).toEqual([]);
     expect(project.subtitle).toBe('Albo 1');
-    expect(project.logline).toBe(original.logline);
-    expect(project.soggetto).toBe(original.soggetto);
+    // la sceneggiatura non contiene logline e soggetto: sono un documento a parte
+    expect(text).not.toContain('LOGLINE');
+    expect(project.logline).toBe('');
 
     const a = resolveProject(original);
     const b = resolveProject(project);
@@ -100,6 +101,14 @@ Nota: l'ombra deve essere enorme.
     ]);
     expect(stats.characters.sort()).toEqual(['Anna', 'Il Guardiano']);
     expect(stats.places.sort()).toEqual(['Faro', 'Scogliera']);
+  });
+
+  it('rilegge il documento separato con logline e soggetto', () => {
+    const original = sampleProject();
+    const { project } = parseScript(exportStoryText(original));
+    expect(project.title).toBe('Il porto delle nebbie');
+    expect(project.logline).toBe(original.logline);
+    expect(project.soggetto).toBe(original.soggetto);
   });
 
   it('riconosce logline e soggetto scritti prima delle tavole', () => {

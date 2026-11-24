@@ -2,7 +2,7 @@ import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
 import { sampleProject } from '../model/factory';
 import { resolveProject } from '../model/resolve';
-import { buildDocx } from './docx';
+import { buildDocx, storyDocumentXml } from './docx';
 import { docxXmlToText, parseScript } from './importer';
 
 describe('esportazione .docx', () => {
@@ -24,7 +24,14 @@ describe('esportazione .docx', () => {
     expect(b.pages[1].panels[4].panel.elements[0].text).toBe(a.pages[1].panels[4].panel.elements[0].text);
     expect(Math.round(b.pages[1].panels[0].width)).toBe(40);
     expect(b.pages[1].panels[2].fields.luce.value).toBe('Fascio del faro, intermittente');
+    expect(xml).not.toContain('LOGLINE');
+  });
+
+  it('logline e soggetto vanno in un documento Word separato', () => {
+    const original = sampleProject();
+    const { project } = parseScript(docxXmlToText(storyDocumentXml(original)));
     expect(project.logline).toBe(original.logline);
     expect(project.soggetto).toBe(original.soggetto);
+    expect(storyDocumentXml(original)).not.toContain('TAVOLA');
   });
 });

@@ -9,7 +9,7 @@ Editor per scrivere sceneggiature a fumetti, con l'anteprima della tavola in pro
 - **Logline e soggetto** in cima alla colonna laterale.
   - Si aprono come finestre che si spostano e si ridimensionano, e restano aperte mentre scrivi le tavole.
   - Contano parole e cartelle.
-  - Finiscono anche in stampa, Word e testo, e nell'importazione.
+  - Si esportano a parte, come documento separato dalla sceneggiatura (*Stampa ed esporta → Soggetto e logline*: PDF, Word, testo).
 - **Tavole a tendina**: la lista delle tavole si apre e si chiude con un clic.
 - **Struttura fissa**: Tavola → Striscia → Vignetta, con numerazione automatica (1.1, 1.2…). Si aggiorna da sola quando sposti, aggiungi o elimini.
 - **Campi di ogni vignetta**: ambiente (INT/EST), luogo, momento, luce, inquadratura, descrizione, balloon, pensieri, sussurri, urli, fuori campo, didascalie, SFX e note per il disegnatore.
