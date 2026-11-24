@@ -27,5 +27,5 @@ const body = src.slice(bodyStart + '<body>'.length, bodyEnd).trim();
 if (!title || !style || !body.includes('id="root"')) throw new Error('Build inattesa');
 
 const out = [title, fonts, style.text, body, script.text].join('\n');
-writeFileSync(new URL('../dist-artifact/tavole.html', import.meta.url), out);
-console.log(`dist-artifact/tavole.html: ${(out.length / 1024).toFixed(0)} kB`);
+writeFileSync(new URL('../dist-artifact/scomic.html', import.meta.url), out);
+console.log(`dist-artifact/scomic.html: ${(out.length / 1024).toFixed(0)} kB`);

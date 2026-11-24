@@ -1,6 +1,8 @@
-# Tavole: sceneggiature per fumetti
+# Scomic
 
 Editor per scrivere sceneggiature a fumetti, con l'anteprima della tavola in proporzione.
+
+**Provalo online:** https://lulup90.github.io/Scomic/
 
 ## Cosa fa (prototipo 0.1)
 
@@ -18,7 +20,7 @@ Editor per scrivere sceneggiature a fumetti, con l'anteprima della tavola in pro
 - **Stampa ed esporta** nel formato classico:
   - PDF (dalla stampa del browser), file per Word (.doc) e testo (.txt);
   - a scelta, ripete in ogni vignetta i dati ripresi dalla precedente.
-- **Salvataggio automatico** nel browser, più salvataggio e apertura del progetto come file `.tavole.json`.
+- **Salvataggio automatico** nel browser, più salvataggio e apertura del progetto come file `.scomic.json`.
 - **Annulla e ripeti**: Ctrl+Z / Ctrl+Y.
 
 ### Scorciatoie da tastiera
@@ -36,7 +38,6 @@ Editor per scrivere sceneggiature a fumetti, con l'anteprima della tavola in pro
 Serve [Node.js](https://nodejs.org) 18 o superiore.
 
 ```bash
-cd tavole
 npm install
 npm run dev        # apre l'app su http://localhost:5173
 ```
@@ -48,6 +49,15 @@ npm test               # test della logica (ripresa dei campi, geometria, densit
 npm run build          # versione pronta da pubblicare in dist/
 npm run build:single   # un unico file dist-single/index.html da aprire con un doppio clic
 ```
+
+## Pagina pubblica (GitHub Pages)
+
+Ogni push sul branch `main` esegue i test, compila l'app e la pubblica su
+https://lulup90.github.io/Scomic/ (workflow `.github/workflows/pages.yml`).
+
+Da fare una volta sola, dopo il primo push: su GitHub apri **Settings → Pages** e
+in **Build and deployment → Source** scegli **GitHub Actions**. Il repository deve essere pubblico
+(o serve un piano GitHub che permetta Pages sui repository privati).
 
 ## Struttura del codice
 

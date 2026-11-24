@@ -42,7 +42,7 @@ export function TopBar() {
     <header className="topbar">
       <div className="brand">
         <IconLogo />
-        <span>Tavole</span>
+        <span>Scomic</span>
       </div>
       <div className="project-meta">
         <input className="title-input" aria-label="Titolo della storia" value={project.title} onChange={(e) => setMeta('title', e.target.value)} />
@@ -102,7 +102,7 @@ export function TopBar() {
                 type="button"
                 role="menuitem"
                 onClick={run(async () => {
-                  const r = await saveFile(`${fileSafeName(project.title)}.tavole.json`, JSON.stringify(project, null, 2), 'application/json');
+                  const r = await saveFile(`${fileSafeName(project.title)}.scomic.json`, JSON.stringify(project, null, 2), 'application/json');
                   if (r === 'unavailable') notify('Qui non è possibile salvare file. Il progetto resta salvato in questo browser.');
                 })}
               >

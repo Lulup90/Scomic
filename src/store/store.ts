@@ -5,7 +5,9 @@ import type { Project } from '../model/types';
 
 export type View = 'scrivi' | 'menabo' | 'stampa';
 
-const STORAGE_KEY = 'tavole.progetto.v1';
+const STORAGE_KEY = 'scomic.progetto.v1';
+/** Chiave usata dalle prime versioni (quando l'app si chiamava Tavole). */
+const OLD_STORAGE_KEY = 'tavole.progetto.v1';
 const HISTORY_LIMIT = 200;
 const COALESCE_MS = 1200;
 
@@ -38,7 +40,7 @@ interface State {
 
 function loadInitial(): Project {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(OLD_STORAGE_KEY);
     if (raw) return parseProject(JSON.parse(raw));
   } catch {
     // archivio del browser non disponibile o dati non validi: si riparte dall'esempio

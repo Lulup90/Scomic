@@ -1,8 +1,8 @@
 {
-  "name": "tavole",
+  "name": "scomic",
   "private": true,
   "version": "0.1.0",
-  "description": "Tavole: editor di sceneggiature per fumetti con anteprima della tavola",
+  "description": "Scomic: editor di sceneggiature per fumetti con anteprima della tavola",
   "type": "module",
   "scripts": {
     "dev": "vite",

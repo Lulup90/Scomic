@@ -19,7 +19,7 @@ export function openProjectFile(): Promise<Project> {
   return new Promise((resolve, reject) => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.json,.tavole,application/json';
+    input.accept = '.json,application/json';
     input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) return reject(new Error('Nessun file scelto.'));

@@ -168,7 +168,7 @@ export function sampleProject(): Project {
 export function parseProject(data: unknown): Project {
   if (!data || typeof data !== 'object') throw new Error('Il file non contiene un progetto valido.');
   const p = data as Partial<Project>;
-  if (p.version !== 1 || !Array.isArray(p.pages)) throw new Error('Il file non è un progetto di Tavole (versione non riconosciuta).');
+  if (p.version !== 1 || !Array.isArray(p.pages)) throw new Error('Il file non è un progetto di Scomic (versione non riconosciuta).');
   const base = emptyProject();
   return {
     ...base,
